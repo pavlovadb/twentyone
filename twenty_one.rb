@@ -1,11 +1,3 @@
-# 1. Initialize deck
-#   -initialize constant variable of the 4 suits represented as strings in array (h, d, s, c)
-#   -initialize constant variable of the card ranks represented as strings in an array (2-10, j, q, k, a)
-#   - create a method that initializes the deck by:
-#   - setting an empty array called new_deck
-#   - loop through the suits array and loop through the card_ranks array and for each suit and each rank
-#   add that to the new_deck array
-#   - return new_deck
 # 2. Deal cards to player and dealer
 # 3. Player turn: hit or stay
 # - repeat until bust or "stay"
@@ -18,8 +10,8 @@
 SUITS = ['H', 'D', 'S', 'C']
 CARD_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 
-player_cards = [['H', 'A'], ['D', '9'], ['S', 'A']]
-dealers_cards = []
+player_cards = [['H', '1'], ['D', '10'], ['S', '10']]
+dealers_cards = [['H', '1'], ['D', '10'], ['S', '10']]
 
 def prompt(message)
   puts "=> #{message}"
@@ -64,8 +56,26 @@ def calculate_total(hand)
   sum
 end
 
+def busted?(hand)
+  # if player > 21
+  calculate_total(hand) < 21
+  # if dealer hand is >= 17
+end
 
-deck = initialize_deck
+loop do
+  prompt 'hit or stay?'
+  answer = gets.chomp
+  break if answer == 'stay' || busted?(player_cards)
+end
 
+if busted?(player_cards)
+  prompt 'Busted! Dealer won.'
+else
+  prompt 'You chose to stay!'
+end
 
+loop do
+  break if calculate_total(dealers_cards) >= 17
+end
 
+prompt 'Dealer busted. You win!'
