@@ -1,14 +1,7 @@
+# frozen_string_literal: true
 
-
-# 4. If player bust, dealer wins.
-#   5. Dealer turn: hit or stay
-# - repeat until total >= 17
-#  ---do we see ONLY one card the entire time?
-# 6. If dealer bust, player wins.
-#   7. Compare cards and declare winner.
-
-SUITS = ['H', 'D', 'S', 'C']
-CARD_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+SUITS = %w[H D S C].freeze
+CARD_RANKS = %w[2 3 4 5 6 7 8 9 10 J Q K A].freeze
 
 def prompt(message)
   puts "=> #{message}"
@@ -71,10 +64,45 @@ end
 
 def play_again?
   display '--------'
-  prompt 'Do you want to play agian? (y/n)'
+  prompt 'Do you want to play again? (y/n)'
   answer = gets.chomp
   answer.downcase.start_with?('y')
 end
+
+def detect_winner(dealer_cards, player_cards)
+  dealer_total = calculate_total(dealer_cards)
+  player_total = calculate_total(player_cards)
+
+  if player_total > 21
+    'player bust'
+  elsif dealer_total > 21
+    'dealer bust'
+  elsif dealer_total < player_total
+    'player'
+  elsif player_total < dealer_total
+    'dealer'
+  else
+    'tie'
+  end
+end
+
+def display_result(dealer_cards, player_cards)
+  result = detect_winner(dealer_cards, player_cards)
+
+  case result
+  when 'player bust'
+    display 'You busted! Dealer wins!'
+  when 'dealer bust'
+    display 'Dealer busted! You win!'
+  when 'player'
+    display 'You win!'
+  when 'dealer'
+    display 'Dealer wins!'
+  when 'tie'
+    display "It's a tie!"
+  end
+end
+
 
 loop do
   puts '---------This is Twenty-One. You and the dealer begin the game with two cards each.---------'
@@ -107,6 +135,7 @@ loop do
       deal_card(deck, player_cards)
       display 'You chose to hit'
       display "Here are your cards: #{player_cards}"
+
       display "Current hand total: #{calculate_total(player_cards)}"
     end
 
@@ -121,7 +150,6 @@ loop do
   end
 
   # dealer turn
-
   loop do
     break if calculate_total(dealers_cards) >= 17
 
@@ -129,11 +157,16 @@ loop do
     sleep(1)
 
     deal_card(deck, dealers_cards)
-    puts "test dealers cards just for me: #{dealers_cards}"
   end
 
-  display "Dealers total was: #{calculate_total(dealers_cards)}"
-  display "Your total was: #{calculate_total(player_cards)}"
+  display "Dealer had #{dealers_cards}, their total was: #{calculate_total(dealers_cards)}"
+  display "You had #{player_cards}, your total was: #{calculate_total(player_cards)}"
+
+  puts '=============='
+  display_result(dealers_cards, player_cards)
+  puts '=============='
 
   break unless play_again?
 end
+
+display 'Bye.'
