@@ -1,6 +1,5 @@
-# 2. Deal cards to player and dealer
-# 3. Player turn: hit or stay
-# - repeat until bust or "stay"
+
+
 # 4. If player bust, dealer wins.
 #   5. Dealer turn: hit or stay
 # - repeat until total >= 17
@@ -63,50 +62,78 @@ def deal_card(deck, hand)
 end
 
 def busted?(hand)
-  # if player > 21
   calculate_total(hand) > 21
-  # if dealer hand is >= 17
 end
 
 def display_dealer_card(hand)
   "#{hand[0]} + [hidden card]"
 end
 
-player_cards = []
-dealers_cards = []
-deck = initialize_deck
-deck = deck.shuffle
-
-puts '---------Welcome to 21. You and the dealer begin the game with two cards each.---------'
-deal_card(deck, player_cards)
-deal_card(deck, dealers_cards)
-deal_card(deck, player_cards)
-deal_card(deck, dealers_cards)
-
-display "Here is your hand: #{player_cards}"
-display "Dealer's cards are: #{display_dealer_card(dealers_cards)}"
+def play_again?
+  display '--------'
+  prompt 'Do you want to play agian? (y/n)'
+  answer = gets.chomp
+  answer.downcase.start_with?('y')
+end
 
 loop do
-  display "Current hand total: #{calculate_total(player_cards)}"
-  prompt 'hit or stay?'
-  answer = gets.chomp
+  puts '---------This is Twenty-One. You and the dealer begin the game with two cards each.---------'
+
+  player_cards = []
+  dealers_cards = []
+  deck = initialize_deck
+  deck = deck.shuffle
 
   deal_card(deck, player_cards)
-  prompt player_cards
+  deal_card(deck, dealers_cards)
+  deal_card(deck, player_cards)
+  deal_card(deck, dealers_cards)
 
-  display "Current hand total: #{calculate_total(player_cards)}"
-  break if answer == 'stay' || busted?(player_cards)
+  display "Here is your hand: #{player_cards}, for a total of #{calculate_total(player_cards)} "
+  display "Dealer's cards are: #{display_dealer_card(dealers_cards)}"
+
+  # player turn
+  loop do
+    answer = nil
+    loop do
+      prompt '[h]it or [s]tay?'
+      answer = gets.chomp.downcase
+      break if %w[h s].include?(answer)
+
+      display "Must enter 'h' or 's'"
+    end
+
+    if answer == 'h'
+      deal_card(deck, player_cards)
+      display 'You chose to hit'
+      display "Here are your cards: #{player_cards}"
+      display "Current hand total: #{calculate_total(player_cards)}"
+    end
+
+    break if answer == 's' || busted?(player_cards)
+  end
+
+  if busted?(player_cards)
+    display 'Busted! Dealer won.'
+    play_again? ? next : break
+  else
+    display 'You chose to stay!'
+  end
+
+  # dealer turn
+
+  loop do
+    break if calculate_total(dealers_cards) >= 17
+
+    prompt "It's the dealers turn"
+    sleep(1)
+
+    deal_card(deck, dealers_cards)
+    puts "test dealers cards just for me: #{dealers_cards}"
+  end
+
+  display "Dealers total was: #{calculate_total(dealers_cards)}"
+  display "Your total was: #{calculate_total(player_cards)}"
+
+  break unless play_again?
 end
-
-
-if busted?(player_cards)
-  display 'Busted! Dealer won.'
-else
-  display 'You chose to stay!'
-end
-
-loop do
-  break if calculate_total(dealers_cards) >= 17
-end
-
-display 'Dealer busted. You win!'
