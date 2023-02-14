@@ -102,41 +102,53 @@ def display_result(dealer_cards, player_cards)
     display "It's a tie!"
   end
 end
+def hit_or_stay?(answer)
+  %w[h s].include?(answer)
+end
 
+def deal_twice(deck, hand)
+  2.times do
+    deal_card(deck, hand)
+  end
+end
 
 loop do
-  puts '---------This is Twenty-One. You and the dealer begin the game with two cards each.---------'
+  display "---------This is Twenty-One. You and the dealer begin the game with two cards each.---------"
 
   player_cards = []
   dealers_cards = []
   deck = initialize_deck
   deck = deck.shuffle
 
-  deal_card(deck, player_cards)
-  deal_card(deck, dealers_cards)
-  deal_card(deck, player_cards)
-  deal_card(deck, dealers_cards)
+  deal_twice(deck, dealers_cards)
+  deal_twice(deck, player_cards)
 
-  display "Here is your hand: #{player_cards}, for a total of #{calculate_total(player_cards)} "
+  player_total = calculate_total(player_cards)
+  dealer_total = calculate_total(dealers_cards)
+
+  display "Here is your hand: #{player_cards}, for a total of #{player_total} "
   display "Dealer's cards are: #{display_dealer_card(dealers_cards)}"
 
   # player turn
   loop do
     answer = nil
     loop do
-      prompt '[h]it or [s]tay?'
+      prompt 'Do you want to [h]it or [s]tay?'
       answer = gets.chomp.downcase
-      break if %w[h s].include?(answer)
+
+      break if hit_or_stay?(answer)
 
       display "Must enter 'h' or 's'"
     end
 
     if answer == 'h'
       deal_card(deck, player_cards)
+      player_total = calculate_total(player_cards)
+
       display 'You chose to hit'
       display "Here are your cards: #{player_cards}"
 
-      display "Current hand total: #{calculate_total(player_cards)}"
+      display "Current hand total: #{player_total}"
     end
 
     break if answer == 's' || busted?(player_cards)
@@ -153,14 +165,15 @@ loop do
   loop do
     break if calculate_total(dealers_cards) >= 17
 
-    prompt "It's the dealers turn"
+    prompt "Dealer is hitting"
     sleep(1)
 
     deal_card(deck, dealers_cards)
+    dealer_total = calculate_total(dealers_cards)
   end
 
-  display "Dealer had #{dealers_cards}, their total was: #{calculate_total(dealers_cards)}"
-  display "You had #{player_cards}, your total was: #{calculate_total(player_cards)}"
+  display "Dealer had #{dealers_cards}, their total was: #{dealer_total}"
+  display "You had #{player_cards}, your total was: #{player_total}"
 
   puts '=============='
   display_result(dealers_cards, player_cards)
