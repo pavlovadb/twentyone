@@ -18,15 +18,8 @@ def initialize_deck
       new_deck << [suit, rank]
     end
   end
-  new_deck
+  new_deck.shuffle
 end
-
-# method takes in a hand of cards (nested array)
-# for each array, check the second element (the rank)
-#  convert the element to an integer to find its value
-#   - for 2-10 the conversion gives the correct value
-#   - for when the conversion returns 0 (j,q,k) set value to 10
-#   - for ace value should be 1 for now
 
 def find_hand_values(hand)
   hand.map do |_, rank|
@@ -54,6 +47,11 @@ def deal_card(deck, hand)
   hand << deck.pop
 end
 
+def display_initial_hand(dealers_cards, player_cards, player_total)
+  display "Here is your hand: #{player_cards}, for a total of #{player_total} "
+  display "Dealer's cards are: #{display_dealer_card(dealers_cards)}"
+end
+
 def busted?(hand)
   calculate_total(hand) > 21
 end
@@ -63,7 +61,6 @@ def display_dealer_card(hand)
 end
 
 def play_again?
-  display '--------'
   prompt 'Do you want to play again? (y/n)'
   answer = gets.chomp
   answer.downcase.start_with?('y')
@@ -102,6 +99,16 @@ def display_result(dealer_cards, player_cards)
     display "It's a tie!"
   end
 end
+
+def end_of_round_output(dealers_cards, player_cards, dealer_total, player_total)
+  puts '=============='
+  display_result(dealers_cards, player_cards)
+  puts '=============='
+
+  display "Dealer had #{dealers_cards}, their total was: #{dealer_total}"
+  display "You had #{player_cards}, your total was: #{player_total}"
+end
+
 def hit_or_stay?(answer)
   %w[h s].include?(answer)
 end
@@ -113,12 +120,11 @@ def deal_twice(deck, hand)
 end
 
 loop do
-  display "---------This is Twenty-One. You and the dealer begin the game with two cards each.---------"
+  display '---------This is Twenty-One. You and the dealer begin the game with two cards each.---------'
 
   player_cards = []
   dealers_cards = []
   deck = initialize_deck
-  deck = deck.shuffle
 
   deal_twice(deck, dealers_cards)
   deal_twice(deck, player_cards)
@@ -126,8 +132,7 @@ loop do
   player_total = calculate_total(player_cards)
   dealer_total = calculate_total(dealers_cards)
 
-  display "Here is your hand: #{player_cards}, for a total of #{player_total} "
-  display "Dealer's cards are: #{display_dealer_card(dealers_cards)}"
+  display_initial_hand(dealers_cards, player_cards, player_total)
 
   # player turn
   loop do
@@ -145,7 +150,7 @@ loop do
       deal_card(deck, player_cards)
       player_total = calculate_total(player_cards)
 
-      display 'You chose to hit'
+      prompt 'You chose to hit'
       display "Here are your cards: #{player_cards}"
 
       display "Current hand total: #{player_total}"
@@ -155,29 +160,28 @@ loop do
   end
 
   if busted?(player_cards)
-    display 'Busted! Dealer won.'
+    end_of_round_output(dealers_cards, player_cards, dealer_total, player_total)
+
     play_again? ? next : break
   else
-    display 'You chose to stay!'
+    prompt 'You chose to stay!'
   end
 
   # dealer turn
+  display "It's the dealers turn."
   loop do
     break if calculate_total(dealers_cards) >= 17
 
-    prompt "Dealer is hitting"
+    prompt 'Dealer hits!'
     sleep(1)
 
     deal_card(deck, dealers_cards)
     dealer_total = calculate_total(dealers_cards)
   end
 
-  display "Dealer had #{dealers_cards}, their total was: #{dealer_total}"
-  display "You had #{player_cards}, your total was: #{player_total}"
+  display 'Dealer stays.'
 
-  puts '=============='
-  display_result(dealers_cards, player_cards)
-  puts '=============='
+  end_of_round_output(dealers_cards, player_cards, dealer_total, player_total)
 
   break unless play_again?
 end
